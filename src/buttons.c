@@ -39,8 +39,9 @@ uint8_t getPressedButton() {
 }
 
 // finds out which button is currently down. does debounce.
+// return of 0 means no button down.
 uint8_t getButtonDown() {
-    uint8_t lastButton = 255;
+    uint8_t lastButton = 0;
     uint8_t count = 0;
     uint8_t pressed;
 
