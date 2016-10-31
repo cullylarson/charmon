@@ -16,12 +16,12 @@ int main(void) {
 
     setup();
 
-    initializeGame();
+    initializeNewGame();
 
     while(1) {
         if(isGameOver()) {
             doEndGame();
-            initializeGame();
+            initializeNewGame();
         }
 
         if(isBeginningOfTurn()) {
@@ -41,6 +41,7 @@ void setup() {
     setupPins();
     setupSound();
     setupArb();
+    setupGame();
 
     sei();
 }

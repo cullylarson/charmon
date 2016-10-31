@@ -1,7 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
-void initializeGame();
+void setupGame();
+void initializeNewGame();
 void doBeginningOfTurn();
 uint8_t isGameOver();
 void doEndGame();
