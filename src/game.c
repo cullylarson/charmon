@@ -57,14 +57,6 @@ void initializeNewGame() {
     _turnTime = 0;
 }
 
-// generates a number between 1 and 4 (inclusive)
-uint8_t generateNewGuessable() {
-    srand(arbc());
-
-    // %4 gives a number between 0-3. +1 gives a number between 1-4.
-    return (rand() % 4) + 1;
-}
-
 void doBeginningOfTurn() {
     // generate a new value for the sequence
     _sequence[_sequenceNextValueIdx] = generateNewGuessable();
@@ -75,6 +67,73 @@ void doBeginningOfTurn() {
 
     // start the timer over
     _turnTime = 0;
+}
+
+uint8_t isGameOver() {
+    // game is over if:
+    // last guess was wrong
+    if(_lastGuessWrong) return 1;
+    // or, time has run out
+    else if(_turnTime >= getTurnLength()) return 1;
+    //or, the sequence is full (it has reached MAX_SEQUENCE_SIZE)
+    else if(_sequenceNextValueIdx >= MAX_SEQUENCE_SIZE) return 1;
+    else return 0;
+}
+
+void doEndGame() {
+    uint8_t i;
+
+    playTone(END_GAME_TONE);
+    lightAllButtons();
+    _delay_ms(1000);
+
+    for(i = 0; i < 5; i++) {
+        quenchAllButtons();        
+        _delay_ms(400);
+        lightAllButtons();
+    }
+
+    _delay_ms(1000);
+    quenchAllButtons();        
+    stopTone();
+    _delay_ms(1000);
+}
+
+uint8_t isBeginningOfTurn() {
+    // is beginning of turn if no guesses have been made (guess index is 0)
+
+    if(_guessIdx == 0) return 1;
+    else return 0;
+}
+
+void doButtonDown(uint8_t button) {
+    playTone(button);
+    lightButton(button);
+
+    // the guess was correct
+    if(button == _sequence[_guessIdx]) {
+        _guessIdx++;
+
+        // the entire sequence was guessed correctly
+        if(_guessIdx >= _sequenceNextValueIdx) {
+            // will trigger a new turn
+            _guessIdx = 0;
+        }
+    }
+    // guess was wrong
+    else {
+        _lastGuessWrong = 1;
+    }
+}
+
+void doButtonUp(uint8_t button) {
+    stopTone();
+    quenchAllButtons();
+}
+
+uint16_t getTurnLength() {
+    if(_sequenceNextValueIdx == 0) return TURN_LENGTH_FACTOR;
+    else return TURN_LENGTH_FACTOR / _sequenceNextValueIdx;
 }
 
 void playSequence() {
@@ -102,68 +161,6 @@ void delayMs(uint16_t ms) {
 uint16_t getPlaySequenceDelayMs() {
     if(_sequenceNextValueIdx == 0) return TURN_LENGTH_FACTOR;
     else return TURN_LENGTH_FACTOR / (10 * _sequenceNextValueIdx);
-}
-
-uint8_t isGameOver() {
-    // game is over if time has run out, or last guess was wrong, or the sequence is full (it has reached MAX_SEQUENCE_SIZE)
-    if(_lastGuessWrong) return 1;
-    else if(_turnTime >= getTurnLength()) return 1;
-    else if(_sequenceNextValueIdx >= MAX_SEQUENCE_SIZE) return 1;
-    else return 0;
-}
-
-uint16_t getTurnLength() {
-    if(_sequenceNextValueIdx == 0) return TURN_LENGTH_FACTOR;
-    else return TURN_LENGTH_FACTOR / _sequenceNextValueIdx;
-}
-
-void doEndGame() {
-    uint8_t i;
-
-    playTone(END_GAME_TONE);
-    lightAllButtons();
-    _delay_ms(1000);
-
-    for(i = 0; i < 5; i++) {
-        quenchAllButtons();        
-        _delay_ms(400);
-        lightAllButtons();
-    }
-
-    _delay_ms(1000);
-    quenchAllButtons();        
-    stopTone();
-}
-
-uint8_t isBeginningOfTurn() {
-    // is beginning of turn if no guesses have been made (guess index is 0)
-
-    if(_guessIdx == 0) return 1;
-    else return 0;
-}
-
-void doButtonDown(uint8_t button) {
-    // the guess was correct
-    if(button == _sequence[_guessIdx]) {
-        _guessIdx++;
-
-        // the entire sequence was guessed correctly
-        if(_guessIdx >= _sequenceNextValueIdx) {
-            _guessIdx = 0;
-        }
-    }
-    // guess was wrong
-    else {
-        _lastGuessWrong = 1;
-    }
-
-    playTone(button);
-    lightButton(button);
-}
-
-void doButtonUp(uint8_t button) {
-    stopTone();
-    quenchAllButtons();
 }
 
 void lightAllButtons() {
@@ -196,4 +193,12 @@ void quenchAllButtons() {
     GOLO(L2_PORT, L2);
     GOLO(L3_PORT, L3);
     GOLO(L4_PORT, L4);
+}
+
+// generates a number between 1 and 4 (inclusive)
+uint8_t generateNewGuessable() {
+    srand(arbc());
+
+    // %4 gives a number between 0-3. +1 gives a number between 1-4.
+    return (rand() % 4) + 1;
 }
