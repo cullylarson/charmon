@@ -61,7 +61,7 @@ void initializeNewGame() {
 uint8_t generateNewGuessable() {
     srand(arbc());
 
-    // %4 gives a number between 0-3. +1 gives a numbet between 1-4.
+    // %4 gives a number between 0-3. +1 gives a number between 1-4.
     return (rand() % 4) + 1;
 }
 
