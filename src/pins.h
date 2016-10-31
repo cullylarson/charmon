@@ -40,6 +40,7 @@
 #define L4_DDR      DDRD
 
 #define SOUND       PB1
+#define SOUND_PORT  PORTB
 #define SOUND_DDR   DDRB
 
 // write digital "high" to pin <pn> on port <port>

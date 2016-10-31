@@ -2,8 +2,6 @@
 #include "pins.h"
 #include <avr/interrupt.h> // won't work without including this, for some reason
 
-int extraTime = 0;
-
 void setupSound() {
     // Timer/Counter 1
 
@@ -13,20 +11,16 @@ void setupSound() {
     // Enable compare A match interrupt
     TIMSK1 |= (1 << OCIE1A);
 
-    // Count to 255
-    OCR1A = 255;
+    // Count to this value
+    OCR1A = 1000;
 
-    // Prescale 1024 (this starts the timer)
-    TCCR1B |= (1 << CS12) | (1 << CS10);
+    // Prescale 8
+    TCCR1B |= (1 << CS11);
 }
 
+// Will toggle at 500Hz
 ISR(TIMER1_COMPA_vect) {
-    extraTime++;
-
-    if(extraTime > 33) {
-        extraTime = 0;
-        TOGGLE(L1_PORT, L1);
-    }
+    TOGGLE(SOUND_PORT, SOUND);
 
     return 0;
 }
