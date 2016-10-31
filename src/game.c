@@ -8,7 +8,7 @@
 #include "pins.h"
 #include "arb.h"
 
-#define MAX_SEQUENCE_SIZE   50
+#define MAX_SEQUENCE_SIZE   200
 #define TURN_LENGTH_FACTOR  10000
 #define END_GAME_TONE       5
 
