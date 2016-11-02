@@ -8,7 +8,7 @@
 
 #define MAX_SEQUENCE_SIZE   200
 #define TURN_LENGTH_BASE  5000
-#define SEQUENCE_PLAY_DELAY_BASE 1000
+#define SEQUENCE_PLAY_DELAY_BASE 500
 #define END_GAME_TONE       5
 
 uint8_t _sequence[MAX_SEQUENCE_SIZE];
@@ -63,7 +63,7 @@ void initializeNewGame() {
     for(i = 0; i < 3; i++) {
         lightAllButtons();
         _delay_ms(400);
-        quenchAllButtons();        
+        quenchAllButtons();
         _delay_ms(400);
     }
 }
@@ -112,14 +112,14 @@ void doEndGame() {
     _delay_ms(1000);
 
     for(i = 0; i < 3; i++) {
-        quenchAllButtons();        
+        quenchAllButtons();
         _delay_ms(400);
         lightAllButtons();
         _delay_ms(400);
     }
 
     _delay_ms(600);
-    quenchAllButtons();        
+    quenchAllButtons();
     stopTone();
     _delay_ms(1000);
 }
@@ -156,14 +156,36 @@ void doButtonUp(uint8_t button) {
 }
 
 uint16_t getTurnLength() {
-    if(_sequenceNextValueIdx == 0) return TURN_LENGTH_BASE;
-    else return TURN_LENGTH_BASE / _sequenceNextValueIdx;
+    if(_sequenceNextValueIdx == 0 || _sequenceNextValueIdx == 1) {
+        return TURN_LENGTH_BASE;
+    }
+    else if(_sequenceNextValueIdx <= 3) {
+        return TURN_LENGTH_BASE - (_sequenceNextValueIdx * 1000);
+    }
+    else {
+        return 1500;
+    }
+}
+
+uint16_t getPlaySequenceDelay() {
+    if(_sequenceNextValueIdx == 0) {
+        return SEQUENCE_PLAY_DELAY_BASE;
+    }
+    else if(_sequenceNextValueIdx <= 3) {
+        return SEQUENCE_PLAY_DELAY_BASE - ((_sequenceNextValueIdx-1) * 100);
+    }
+    else if(_sequenceNextValueIdx <= 6) {
+        return 250;
+    }
+    else {
+        return 200;
+    }
 }
 
 void playSequence() {
     uint8_t i;
     uint8_t button;
-    uint16_t playDelayMs = getPlaySequenceDelayMs();
+    uint16_t playDelay = getPlaySequenceDelay();
 
     uint8_t lastIdx = _sequenceNextValueIdx - 1;
 
@@ -173,23 +195,18 @@ void playSequence() {
         playTone(button);
         lightButton(button);
 
-        delayMs(playDelayMs);
+        delayMs(playDelay);
 
         stopTone();
         quenchAllButtons();
 
         // don't delay on last, since the lights will just be off while the user waits
-        if(i != lastIdx) delayMs(playDelayMs);
+        if(i != lastIdx) delayMs(playDelay);
     }
 }
 
 void delayMs(uint16_t ms) {
     while(ms--) _delay_ms(1);
-}
-
-uint16_t getPlaySequenceDelayMs() {
-    if(_sequenceNextValueIdx == 0) return SEQUENCE_PLAY_DELAY_BASE;
-    else return SEQUENCE_PLAY_DELAY_BASE / (_sequenceNextValueIdx);
 }
 
 void lightAllButtons() {
