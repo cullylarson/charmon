@@ -23,7 +23,6 @@ volatile uint32_t _totalTime = 0; // should count in approx. milliseconds
 // TODO -- Everything assumes 4MHz clock speed. If that works, need to make sure system clocks to 4MHz in production. Actually, maybe it's running at 8Mhz? Seems like it.
 // TODO -- Consider switching to 1Mhz clock so we're guaranteed that speed (or get a 4Mhz crystal?)
 // TODO -- Refine the TURN_LENGTH_BASE and turn length
-// TODO -- Make the 'play sequence' go faster, depending on the level
 // TODO -- Somehow need to trigger the random number seeding after a button press (so it's actually random). Or maybe use some external noise?
 //         Actually, the worst case, the first value will always be the same, but the second will be actually random (since rand is seeded on each new value)
 
