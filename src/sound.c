@@ -38,7 +38,7 @@ void playTone(uint8_t tone) {
     // count to this value
     OCR1A = counter;
 
-    // enable compare A match interrupt ( don't enable it yet, or the sound will start playing)
+    // enable compare A match interrupt
     TIMSK1 |= (1 << OCIE1A);
 }
 

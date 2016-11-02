@@ -7,7 +7,6 @@
 #include "sound.h"
 #include "buttons.h"
 #include "game.h"
-#include "arb.h"
 
 void setup();
 
@@ -40,7 +39,6 @@ int main(void) {
 void setup() {
     setupPins();
     setupSound();
-    setupArb();
     setupGame();
 
     sei();

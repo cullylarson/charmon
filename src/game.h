@@ -7,6 +7,7 @@ void doBeginningOfTurn();
 uint8_t isGameOver();
 void doEndGame();
 uint8_t isBeginningOfTurn();
+uint8_t isFirstTurn();
 void doButtonDown(uint8_t button);
 void doButtonUp(uint8_t button);
 uint8_t generateNewGuessable();

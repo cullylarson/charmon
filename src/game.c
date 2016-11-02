@@ -9,15 +9,18 @@
 #include "arb.h"
 
 #define MAX_SEQUENCE_SIZE   200
-#define TURN_LENGTH_FACTOR  10000
+#define TURN_LENGTH_FACTOR  5000
+#define SEQUENCE_PLAY_DELAY_FACTOR 1000
 #define END_GAME_TONE       5
 
 uint8_t _sequence[MAX_SEQUENCE_SIZE];
 uint8_t _sequenceNextValueIdx;
 uint8_t _lastGuessWrong;
+uint8_t _beginningOfTurn;
 uint8_t _guessIdx;
 
-volatile uint32_t _turnTime = 0;
+volatile uint16_t _turnTime = 0; // should count in approx. milliseconds
+volatile uint32_t _totalTime = 0; // should count in approx. milliseconds
 
 // TODO -- Everything assumes 4MHz clock speed. If that works, need to make sure system clocks to 4MHz in production.
 // TODO -- Consider switching to 1Mhz clock so we're guaranteed that speed (or get a 4Mhz crystal?)
@@ -27,46 +30,69 @@ volatile uint32_t _turnTime = 0;
 //         Actually, the worst case, the first value will always be the same, but the second will be actually random (since rand is seeded on each new value)
 
 void setupGame() {
-    // Timer/Counter 1
-
-    // NOTE: Sharing timer 1 with sound.c (we're using register B here), so be redundant, but don't step on toes (e.g. don't change the prescale)
+    // Timer/Counter 0
 
     // CTC
-    TCCR1B |= (1 << WGM12);
+    TCCR0A |= (1 << WGM01);
 
-    // Prescale 8 (set in sound.c)
+    // Prescale 256
+    TCCR0B |= (1 << CS01) | (1 << CS00);
 
     // count to this value
-    OCR1B = 65535; // max 16-bit value
+    OCR0A = 125;
 
-    // enable compare B match interrupt
-    TIMSK1 |= (1 << OCIE1B);
+    // enable compare A match interrupt
+    TIMSK0 |= (1 << OCIE0A);
 }
 
-ISR(TIMER1_COMPB_vect) {
-    // this should be incremented every 0.13 seconds (4Mhz clock)
+// about every millisecond
+ISR(TIMER0_COMPA_vect) {
     _turnTime++;
+    _totalTime++;
 }
 
 void initializeNewGame() {
     // reset everything.  don't put anything in the sequence, since that will be done at the beginning of the turn
 
+    _beginningOfTurn = 1;
     _sequenceNextValueIdx = 0;
     _lastGuessWrong = 0;
     _guessIdx = 0;
     _turnTime = 0;
+
+    uint8_t i;
+
+    for(i = 0; i < 3; i++) {
+        _delay_ms(400);
+        lightAllButtons();
+        _delay_ms(400);
+        quenchAllButtons();        
+    }
 }
 
 void doBeginningOfTurn() {
+    _beginningOfTurn = 0;
+    // start guessing from the beginning
+    _guessIdx = 0;
+
     // generate a new value for the sequence
     _sequence[_sequenceNextValueIdx] = generateNewGuessable();
     _sequenceNextValueIdx++;
+
+    // if this isn't the first turn, wait a little before
+    // playing the sequence so it doesn't come right after
+    // the last button press
+    if(!isFirstTurn()) _delay_ms(600);
 
     // show the sequence to the user
     playSequence();
 
     // start the timer over
     _turnTime = 0;
+}
+
+uint8_t isFirstTurn() {
+    return _sequenceNextValueIdx == 1;
 }
 
 uint8_t isGameOver() {
@@ -87,23 +113,21 @@ void doEndGame() {
     lightAllButtons();
     _delay_ms(1000);
 
-    for(i = 0; i < 5; i++) {
+    for(i = 0; i < 3; i++) {
         quenchAllButtons();        
         _delay_ms(400);
         lightAllButtons();
+        _delay_ms(400);
     }
 
-    _delay_ms(1000);
+    _delay_ms(600);
     quenchAllButtons();        
     stopTone();
     _delay_ms(1000);
 }
 
 uint8_t isBeginningOfTurn() {
-    // is beginning of turn if no guesses have been made (guess index is 0)
-
-    if(_guessIdx == 0) return 1;
-    else return 0;
+    return _beginningOfTurn;
 }
 
 void doButtonDown(uint8_t button) {
@@ -114,10 +138,12 @@ void doButtonDown(uint8_t button) {
     if(button == _sequence[_guessIdx]) {
         _guessIdx++;
 
+        // reset the turn time on each correct guess
+        _turnTime = 0;
+
         // the entire sequence was guessed correctly
         if(_guessIdx >= _sequenceNextValueIdx) {
-            // will trigger a new turn
-            _guessIdx = 0;
+            _beginningOfTurn = 1;
         }
     }
     // guess was wrong
@@ -141,7 +167,9 @@ void playSequence() {
     uint8_t button;
     uint16_t playDelayMs = getPlaySequenceDelayMs();
 
-    for(i = 0; i < _sequenceNextValueIdx; i++) {
+    uint8_t lastIdx = _sequenceNextValueIdx - 1;
+
+    for(i = 0; i <= lastIdx; i++) {
         button = _sequence[i];
 
         playTone(button);
@@ -151,6 +179,9 @@ void playSequence() {
 
         stopTone();
         quenchAllButtons();
+
+        // don't delay on last, since the lights will just be off while the user waits
+        if(i != lastIdx) delayMs(playDelayMs);
     }
 }
 
@@ -159,8 +190,8 @@ void delayMs(uint16_t ms) {
 }
 
 uint16_t getPlaySequenceDelayMs() {
-    if(_sequenceNextValueIdx == 0) return TURN_LENGTH_FACTOR;
-    else return TURN_LENGTH_FACTOR / (10 * _sequenceNextValueIdx);
+    if(_sequenceNextValueIdx == 0) return SEQUENCE_PLAY_DELAY_FACTOR;
+    else return SEQUENCE_PLAY_DELAY_FACTOR / (_sequenceNextValueIdx);
 }
 
 void lightAllButtons() {
@@ -197,7 +228,7 @@ void quenchAllButtons() {
 
 // generates a number between 1 and 4 (inclusive)
 uint8_t generateNewGuessable() {
-    srand(arbc());
+    srand(_totalTime);
 
     // %4 gives a number between 0-3. +1 gives a number between 1-4.
     return (rand() % 4) + 1;
