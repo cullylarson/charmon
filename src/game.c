@@ -3,14 +3,12 @@
 #include <avr/interrupt.h> // won't work without including this, for some reason
 #include <util/delay.h>
 #include "game.h"
-#include "arb.h"
 #include "sound.h"
 #include "pins.h"
-#include "arb.h"
 
 #define MAX_SEQUENCE_SIZE   200
-#define TURN_LENGTH_FACTOR  5000
-#define SEQUENCE_PLAY_DELAY_FACTOR 1000
+#define TURN_LENGTH_BASE  5000
+#define SEQUENCE_PLAY_DELAY_BASE 1000
 #define END_GAME_TONE       5
 
 uint8_t _sequence[MAX_SEQUENCE_SIZE];
@@ -22,9 +20,9 @@ uint8_t _guessIdx;
 volatile uint16_t _turnTime = 0; // should count in approx. milliseconds
 volatile uint32_t _totalTime = 0; // should count in approx. milliseconds
 
-// TODO -- Everything assumes 4MHz clock speed. If that works, need to make sure system clocks to 4MHz in production.
+// TODO -- Everything assumes 4MHz clock speed. If that works, need to make sure system clocks to 4MHz in production. Actually, maybe it's running at 8Mhz? Seems like it.
 // TODO -- Consider switching to 1Mhz clock so we're guaranteed that speed (or get a 4Mhz crystal?)
-// TODO -- Refine the TURN_LENGTH_FACTOR and turn length
+// TODO -- Refine the TURN_LENGTH_BASE and turn length
 // TODO -- Make the 'play sequence' go faster, depending on the level
 // TODO -- Somehow need to trigger the random number seeding after a button press (so it's actually random). Or maybe use some external noise?
 //         Actually, the worst case, the first value will always be the same, but the second will be actually random (since rand is seeded on each new value)
@@ -63,10 +61,10 @@ void initializeNewGame() {
     uint8_t i;
 
     for(i = 0; i < 3; i++) {
-        _delay_ms(400);
         lightAllButtons();
         _delay_ms(400);
         quenchAllButtons();        
+        _delay_ms(400);
     }
 }
 
@@ -158,8 +156,8 @@ void doButtonUp(uint8_t button) {
 }
 
 uint16_t getTurnLength() {
-    if(_sequenceNextValueIdx == 0) return TURN_LENGTH_FACTOR;
-    else return TURN_LENGTH_FACTOR / _sequenceNextValueIdx;
+    if(_sequenceNextValueIdx == 0) return TURN_LENGTH_BASE;
+    else return TURN_LENGTH_BASE / _sequenceNextValueIdx;
 }
 
 void playSequence() {
@@ -190,8 +188,8 @@ void delayMs(uint16_t ms) {
 }
 
 uint16_t getPlaySequenceDelayMs() {
-    if(_sequenceNextValueIdx == 0) return SEQUENCE_PLAY_DELAY_FACTOR;
-    else return SEQUENCE_PLAY_DELAY_FACTOR / (_sequenceNextValueIdx);
+    if(_sequenceNextValueIdx == 0) return SEQUENCE_PLAY_DELAY_BASE;
+    else return SEQUENCE_PLAY_DELAY_BASE / (_sequenceNextValueIdx);
 }
 
 void lightAllButtons() {
