@@ -26,6 +26,17 @@ volatile uint32_t _totalTime = 0; // should count in approx. milliseconds
 // TODO -- Somehow need to trigger the random number seeding after a button press (so it's actually random). Or maybe use some external noise?
 //         Actually, the worst case, the first value will always be the same, but the second will be actually random (since rand is seeded on each new value)
 
+uint8_t isFirstTurn();
+void playSequence();
+uint16_t getPlaySequenceDelayMs();
+void lightButton(uint8_t button);
+void lightAllButtons();
+void quenchAllButtons();
+uint16_t getTurnLength();
+uint16_t getPlaySequenceDelayMs();
+void delayMs(uint16_t ms);
+uint8_t generateNewGuessable();
+
 void setupGame() {
     // Timer/Counter 0
 
@@ -98,7 +109,7 @@ uint8_t isGameOver() {
     if(_lastGuessWrong) return 1;
     // or, time has run out
     else if(_turnTime >= getTurnLength()) return 1;
-    //or, the sequence is full (it has reached MAX_SEQUENCE_SIZE)
+    // or, the sequence is full (it has reached MAX_SEQUENCE_SIZE)
     else if(_sequenceNextValueIdx >= MAX_SEQUENCE_SIZE) return 1;
     else return 0;
 }
