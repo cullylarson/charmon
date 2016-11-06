@@ -82,6 +82,7 @@ void doInitialRandSeed() {
 
     // read the first byte
     uint8_t byte1 = ADCL;
+    uint8_t trashByte = ADCH; // apparently you also need to read from ADCH, or the next conversion won't produce a new value?
 
     // start conversion again
     ADCSRA |= _BV(ADSC);
@@ -91,6 +92,7 @@ void doInitialRandSeed() {
 
     // read the second byte
     uint8_t byte2 = ADCL;
+    trashByte = ADCH;
 
     uint16_t seed = (byte1 << 8) | byte2;
 
