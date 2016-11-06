@@ -63,7 +63,7 @@ void doInitialRandSeed() {
 
     // Initial seed of the random number generator on pin 28 (PC5/ADC5)
 
-    // voltange reference: AVCC with external capacitor at AREF pin
+    // voltage reference: AVCC with external capacitor at AREF pin (this is just for noise, so I don't think I need a cap)
     ADMUX |= (1 << REFS0);
 
     // read from ADC5
@@ -85,10 +85,10 @@ void doInitialRandSeed() {
     uint8_t trashByte = ADCH; // apparently you also need to read from ADCH, or the next conversion won't produce a new value?
 
     // start conversion again
-    ADCSRA |= _BV(ADSC);
+    ADCSRA |= (1 << ADSC);
 
     // wait until ADC is done again
-    while (ADCSRA & _BV(ADSC));
+    while (ADCSRA & (1 << ADSC));
 
     // read the second byte
     uint8_t byte2 = ADCL;
@@ -99,7 +99,7 @@ void doInitialRandSeed() {
     srand(seed);
 
     // disable ADC
-    ADCSRA &= ~_BV(ADEN);
+    ADCSRA &= ~(1 << ADEN);
 }
 
 // about every millisecond
