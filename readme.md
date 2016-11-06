@@ -21,6 +21,7 @@ _NOTE: The makefile uses `avr-gcc` and `avrdude` to compile and upload. It also 
 
 ## Resources
 
+* [Doing ADC to seed rand](http://www.bytecruft.com/2013/03/seeding-standard-c-random-number.html)
 * [AVR Programming](https://github.com/cullylarson/avr-programming)
 * [C Constants for ATMega328P](https://github.com/vancegroup-mirrors/avr-libc/blob/master/avr-libc/include/avr/iom328p.h)
 * [ATMega328 Datasheet](http://www.sparkfun.com/datasheets/Components/SMD/ATMega328.pdf)

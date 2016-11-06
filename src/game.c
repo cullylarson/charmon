@@ -16,15 +16,14 @@ uint8_t _sequenceNextValueIdx;
 uint8_t _lastGuessWrong;
 uint8_t _beginningOfTurn;
 uint8_t _guessIdx;
+uint8_t _skipSrandOnce;
 
 volatile uint16_t _turnTime = 0; // should count in approx. milliseconds
 volatile uint32_t _totalTime = 0; // should count in approx. milliseconds
 
-// TODO -- Everything assumes 4MHz clock speed. If that works, need to make sure system clocks to 4MHz in production. Actually, maybe it's running at 8Mhz? Seems like it.
-// TODO -- Consider switching to 1Mhz clock so we're guaranteed that speed (or get a 4Mhz crystal?)
+// TODO -- Everything assumes 8MHz clock speed. If that works, need to make sure system clocks to 8MHz in production.
+// TODO -- Consider switching to 8Mhz clock so we're guaranteed that speed.
 // TODO -- Refine the TURN_LENGTH_BASE and turn length
-// TODO -- Somehow need to trigger the random number seeding after a button press (so it's actually random). Or maybe use some external noise?
-//         Actually, the worst case, the first value will always be the same, but the second will be actually random (since rand is seeded on each new value)
 
 uint8_t isFirstTurn();
 void playSequence();
@@ -36,8 +35,12 @@ uint16_t getTurnLength();
 uint16_t getPlaySequenceDelayMs();
 void delayMs(uint16_t ms);
 uint8_t generateNewGuessable();
+void doInitialRandSeed();
 
 void setupGame() {
+    // Seed the random number generator
+    doInitialRandSeed();
+
     // Timer/Counter 0
 
     // CTC
@@ -51,6 +54,49 @@ void setupGame() {
 
     // enable compare A match interrupt
     TIMSK0 |= (1 << OCIE0A);
+}
+
+void doInitialRandSeed() {
+    // we're doing this first seed, so no need to do it again the next time we srand
+    _skipSrandOnce = 1;
+
+    // Initial seed of the random number generator on pin 28 (PC5/ADC5)
+
+    // voltange reference: AVCC with external capacitor at AREF pin
+    ADMUX |= (1 << REFS0);
+
+    // read from ADC5
+    ADMUX |= (1 << MUX0) | (1 << MUX2);
+
+    // apparently you need to to ADC at between 50kHz and 200kHz for 10-bit converstion, so
+    // we need to prescale the clock. Assuming 8Mhz, scaling by 64 will give us 125kHz sampling
+    // rate. this is also good in case our clock speed is a bit slow (we'll still be in the range).
+    ADCSRA |= (1 << ADPS2) | (1 << ADPS1); // scale by 64
+
+    ADCSRA |= (1 << ADEN); // enable ADC
+    ADCSRA |= (1 << ADSC); // start conversion
+
+    // wait until ADC is done
+    while(ADCSRA & (1 << ADSC));
+
+    // read the first byte
+    uint8_t byte1 = ADCL;
+
+    // start conversion again
+    ADCSRA |= _BV(ADSC);
+
+    // wait until ADC is done again
+    while (ADCSRA & _BV(ADSC));
+
+    // read the second byte
+    uint8_t byte2 = ADCL;
+
+    uint16_t seed = (byte1 << 8) | byte2;
+
+    srand(seed);
+
+    // disable ADC
+    ADCSRA &= ~_BV(ADEN);
 }
 
 // about every millisecond
@@ -253,8 +299,15 @@ void quenchAllButtons() {
 
 // generates a number between 1 and 4 (inclusive)
 uint8_t generateNewGuessable() {
-    srand(_totalTime);
+    // this first time this is called, it will already have been seeded by random noise
+    if(_skipSrandOnce) {
+        _skipSrandOnce = 0;
+    }
+    else {
+        srand(_totalTime);
+    }
 
     // %4 gives a number between 0-3. +1 gives a number between 1-4.
     return (rand() % 4) + 1;
+
 }
