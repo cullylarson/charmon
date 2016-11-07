@@ -14,7 +14,7 @@ void setupPins() {
     B3_DDR &= ~(1 << B3);
     B4_DDR &= ~(1 << B4);
     
-    // start high so that reading a 0 means pressed?
+    // start high, which enables the pull-resistors, and also means that reading a 0 indicates button pressed (and reading 1 indicates no button pressed)
     B1_PORT |= (1 << B1);
     B2_PORT |= (1 << B2);
     B3_PORT |= (1 << B3);
@@ -22,5 +22,4 @@ void setupPins() {
 
     // sound output
     SOUND_DDR |= (1 << SOUND);
-
 }
