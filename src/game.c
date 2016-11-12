@@ -24,7 +24,7 @@ volatile uint32_t _totalTime = 0; // should count in approx. milliseconds
 // TODO -- Everything assumes 8MHz clock speed. If that works, need to make sure system clocks to 8MHz in production.
 // TODO -- Consider switching to 8Mhz clock so we're guaranteed that speed.
 // TODO -- Refine the TURN_LENGTH_BASE and turn length.
-// TODO -- Consider a switch for difference difficulties.
+// TODO -- Consider a switch for different difficulties.
 
 uint8_t isFirstTurn();
 void playSequence();

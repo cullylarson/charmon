@@ -23,21 +23,21 @@
 #define B4_DDR      DDRD
 #define B4_IN       PIND
 
-#define L1          PB6
-#define L1_PORT     PORTB
-#define L1_DDR      DDRB
+#define L1          PD5
+#define L1_PORT     PORTD
+#define L1_DDR      DDRD
 
-#define L2          PB7
-#define L2_PORT     PORTB
-#define L2_DDR      DDRB
+#define L2          PD6
+#define L2_PORT     PORTD
+#define L2_DDR      DDRD
 
-#define L3          PD5
+#define L3          PD7
 #define L3_PORT     PORTD
 #define L3_DDR      DDRD
 
-#define L4          PD6
-#define L4_PORT     PORTD
-#define L4_DDR      DDRD
+#define L4          PB0
+#define L4_PORT     PORTB
+#define L4_DDR      DDRB
 
 #define SOUND       PB1
 #define SOUND_PORT  PORTB
