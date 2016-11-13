@@ -2,7 +2,7 @@ GCC_DEVICE  = atmega328p
 DUDE_DEVICE = m328p
 CLOCK       = 8000000            # 8Mhz (just used for code that needs to know about the CPU)
 PROGRAMMER  = -c usbtiny -P usb  # For using Sparkfun Pocket AVR Programmer
-FUSES       = -U lfuse:w:0xf7:m -U hfuse:w:0xde:m -U efuse:w:0xff:m # 8MHz external crystal, full-swing mode, CKDIV8 is off
+FUSES       = -U lfuse:w:0xf7:m -U hfuse:w:0xde:m -U efuse:w:0xff:m # external crystal (can be any MHz), full-swing mode, CKDIV8 is off
 SRCS        = $(wildcard src/*.c)
 DEPS        = $(wildcard src/*.h)
 OBJS        = $(SRCS:src/%.c=build/%.o)
