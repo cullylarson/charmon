@@ -19,6 +19,20 @@ _NOTE: The makefile uses `avr-gcc` and `avrdude` to compile and upload. It also 
     $ make upload
     ```
 
+## Layout Ideas
+
+### Square
+
+This is supposed to be `4" x 4"`.  There's an Adobe Illustrator file with the correct dimensions in the `assets` folder.
+
+![Square Layout](assets/layout-square.png)
+
+### Hexish
+
+This is supposed to be `5" x 5"`.  There's an Adobe Illustrator file with the correct dimensions in the `assets` folder.
+
+![Hexish Layout](assets/layout-hex.png)
+
 ## Resources
 
 * [Doing ADC to seed rand](http://www.bytecruft.com/2013/03/seeding-standard-c-random-number.html)
