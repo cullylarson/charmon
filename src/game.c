@@ -7,8 +7,6 @@
 #include "pins.h"
 
 #define MAX_SEQUENCE_SIZE   200
-#define TURN_LENGTH_BASE  5000
-#define SEQUENCE_PLAY_DELAY_BASE 500
 #define END_GAME_TONE       5
 
 uint8_t _sequence[MAX_SEQUENCE_SIZE];
@@ -23,7 +21,6 @@ volatile uint32_t _totalTime = 0; // should count in approx. milliseconds
 
 // TODO -- Everything assumes 8MHz clock speed. If that works, need to make sure system clocks to 8MHz in production.
 // TODO -- Consider switching to 8Mhz clock so we're guaranteed that speed.
-// TODO -- Refine the TURN_LENGTH_BASE and turn length.
 // TODO -- Consider a switch for different difficulties.
 
 uint8_t isFirstTurn();
@@ -215,29 +212,22 @@ void doButtonUp(uint8_t button) {
 }
 
 uint16_t getTurnLength() {
-    if(_sequenceNextValueIdx == 0 || _sequenceNextValueIdx == 1) {
-        return TURN_LENGTH_BASE;
-    }
-    else if(_sequenceNextValueIdx <= 3) {
-        return TURN_LENGTH_BASE - (_sequenceNextValueIdx * 1000);
-    }
-    else {
-        return 1500;
+    switch(_sequenceNextValueIdx) {
+        case 0:
+        case 1: return 5000;
+        case 2: return 3000;
+        default: return 2000;
     }
 }
 
 uint16_t getPlaySequenceDelay() {
-    if(_sequenceNextValueIdx == 0) {
-        return SEQUENCE_PLAY_DELAY_BASE;
-    }
-    else if(_sequenceNextValueIdx <= 3) {
-        return SEQUENCE_PLAY_DELAY_BASE - ((_sequenceNextValueIdx-1) * 100);
-    }
-    else if(_sequenceNextValueIdx <= 6) {
-        return 250;
-    }
-    else {
-        return 200;
+    switch(_sequenceNextValueIdx) {
+        case 0:
+        case 1: return 500;
+        case 2: return 400;
+        case 3: return 300;
+        case 4: return 250;
+        default: return 200;
     }
 }
 
