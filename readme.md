@@ -42,6 +42,9 @@ This is supposed to be `5" x 5"`.  There's an Adobe Illustrator file with the co
 * [Debounce Guide](assets/debounce-guide.pdf)
 * [Video on Debouncing](https://www.youtube.com/watch?v=RzVc3o0iedM)
 * [Arduino C Code on Github](https://github.com/arduino/Arduino/tree/master/hardware/arduino/avr/cores/arduino)
+* [Online Tone Generator](http://onlinetonegenerator.com/)
+* [Frequencies for the Original Simon Game](http://www.waitingforfriday.com/index.php/Reverse_engineering_an_MB_Electronic_Simon_game#Sound_frequencies_and_timing)
+* [AVR Timer Calculator](https://www.easycalculation.com/engineering/electrical/avr-timer-calculator.php)
 
 ### Pin Layouts
 
